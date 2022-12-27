@@ -173,7 +173,7 @@ func _parse_end(object: Object) -> void:
 		var parent_vbox: Control = first_property.get_parent()
 		do_unfold_section(parent_vbox.get_parent())
 		for prop in property_name_to_editor:
-			property_name_to_editor[prop].set_tooltip("shader_parameter/" + prop + "\n" + property_text.get(prop, ["",""])[1])
+			property_name_to_editor[prop].tooltip_text = "shader_parameter/" + prop + "\n" + property_text.get(prop, ["",""])[1]
 		for param in property_headers:
 			var property_editor: Control = property_name_to_editor.get(param)
 			if property_editor != null:
