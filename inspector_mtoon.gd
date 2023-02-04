@@ -9,11 +9,13 @@ const mtoon_trans_zwrite: Shader = preload("mtoon_trans_zwrite.gdshader")
 const mtoon_trans_zwrite_cull_off: Shader = preload("mtoon_trans_zwrite_cull_off.gdshader")
 const mtoon_outline: Shader = preload("mtoon_outline.gdshader")
 
+
 func _can_handle(object: Variant) -> bool:
 	if object is ShaderMaterial:
 		if object.shader.resource_path.find("/mtoon") != -1 && object.shader.resource_path.find("mtoon_outline") == -1:
 			return true
 	return false
+
 
 var first_property: EditorProperty = null
 var last_tex_property: String = ""
@@ -114,12 +116,13 @@ const steps = {
 	"_OutlineScaledMaxDistance": 0.0,
 }
 
+
 func merge_single_line_properties(label: String, outer_prop: Control, inner_prop: Control) -> void:
 	var parent_vbox: Control = outer_prop.get_parent()
 	parent_vbox.remove_child(inner_prop)
 	inner_prop.label = ""
 	outer_prop.label = label
-	var sub_picker: Control = outer_prop.get_child(outer_prop.get_child_count()-1)
+	var sub_picker: Control = outer_prop.get_child(outer_prop.get_child_count() - 1)
 	outer_prop.remove_child(sub_picker)
 	sub_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sub_picker.size_flags_vertical = 0
@@ -138,10 +141,12 @@ func merge_single_line_properties(label: String, outer_prop: Control, inner_prop
 	outer_prop.add_child(inner_prop, true)
 	outer_prop.add_child(new_hbox, true)
 
+
 # Copy texture modifications to next_pass material
 func _texture_property_changed(texture_property: EditorProperty, property_name: StringName, value: Variant) -> void:
 	if MToonProperty.has_outline_pass_static(texture_property.get_edited_object()):
 		texture_property.get_edited_object().next_pass[texture_property.get_edited_property()] = value
+
 
 func _process_tex_property() -> void:
 	var prop = last_tex_property
@@ -157,11 +162,13 @@ func _process_tex_property() -> void:
 		if new_parent != null:
 			parent_vbox.remove_child(texture_property)
 			new_parent.add_sibling(texture_property)
-			texture_property.label = property_text.get(prop, ["texture_property.label",""])[0]
+			texture_property.label = property_text.get(prop, ["texture_property.label", ""])[0]
 			property_name_to_editor[prop] = texture_property
+
 
 func do_unfold_section(editor_inspector_section: Node) -> void:
 	editor_inspector_section.unfold()
+
 
 #func parse_category(object: Object, category: String) -> void:
 #	print("Category " + str(category))
@@ -200,7 +207,8 @@ func _parse_end(object: Object) -> void:
 				label.add_theme_color_override("font_color", Color(round(c.r), round(c.g), round(c.b), 1.0))
 				property_name_to_editor[label.text] = hbox_container
 		property_name_to_editor["_OutlineWidthMode"].hide_if_value = {
-			0: [
+			0:
+			[
 				property_name_to_editor["_OutlineColorMode"],
 				property_name_to_editor["_OutlineColor"],
 				property_name_to_editor["_OutlineLightingMix"],
@@ -208,15 +216,16 @@ func _parse_end(object: Object) -> void:
 				property_name_to_editor["_OutlineScaledMaxDistance"],
 				property_name_to_editor["Outline Color"],
 			],
-			1: [
+			1:
+			[
 				property_name_to_editor["_OutlineScaledMaxDistance"],
 			],
-			2: [
-			],
+			2: [],
 		}
 		property_name_to_editor["_OutlineWidthMode"]._update_property()
 		property_name_to_editor["_AlphaCutoutEnable"].hide_if_value = {
-			0: [
+			0:
+			[
 				property_name_to_editor["_Cutoff"],
 			],
 			1: [],
@@ -225,8 +234,10 @@ func _parse_end(object: Object) -> void:
 		first_property = null
 		property_name_to_editor = {}.duplicate()
 
+
 func is_a_shader_parameter(path: String) -> bool:
 	return path.begins_with("shader_parameter/")
+
 
 func _parse_property(object: Object, type: int, path: String, hint: int, hint_text: String, usage: int, wide: bool) -> bool:
 	if not last_tex_property.is_empty():
@@ -273,7 +284,9 @@ func _parse_property(object: Object, type: int, path: String, hint: int, hint_te
 		return true
 	return false
 
-class MToonProperty extends EditorProperty:
+
+class MToonProperty:
+	extends EditorProperty
 	var updating: bool = false
 	var tooltip: String = ""
 	var hide_if_value: Dictionary = {}
@@ -282,7 +295,7 @@ class MToonProperty extends EditorProperty:
 	func _make_custom_tooltip(text: String) -> Object:
 		var label: Label = Label.new()
 		label.text = text + self.tooltip
-		label.custom_minimum_size = Vector2(200,30)
+		label.custom_minimum_size = Vector2(200, 30)
 		return label
 
 	func get_tooltip_text() -> String:
@@ -325,10 +338,12 @@ class MToonProperty extends EditorProperty:
 		slider.custom_minimum_size = Vector2(50.0, 20.0)
 		slider.value_changed.connect(self._value_changed)
 
-	func emit_changed(prop : StringName, val : Variant, field : StringName = &"", changing : bool = false) -> void:
+	func emit_changed(prop: StringName, val: Variant, field: StringName = &"", changing: bool = false) -> void:
 		get_edited_object()[prop] = val
 
-class RenderingTypeInspector extends MToonProperty:
+
+class RenderingTypeInspector:
+	extends MToonProperty
 	var dropdown: OptionButton = OptionButton.new()
 	var cull_off_checkbox: CheckBox = CheckBox.new()
 	var rendering_type_box: VBoxContainer = VBoxContainer.new()
@@ -349,29 +364,31 @@ class RenderingTypeInspector extends MToonProperty:
 		dropdown.item_selected.connect(self._item_selected)
 
 	func _cull_toggled(value: bool) -> void:
-		if updating: return
+		if updating:
+			return
 		_update_shader(dropdown.selected, value)
 
 	func _item_selected(option_idx: int) -> void:
-		if updating: return
+		if updating:
+			return
 		_update_shader(option_idx, cull_off_checkbox.button_pressed)
 
 	func _update_shader(option_idx: int, cull_off: bool) -> void:
 		var shader_name: String = get_edited_object().shader.resource_path.split("/")[-1]
 		match option_idx:
-			0: # Opaque
+			0:  # Opaque
 				emit_changed(get_edited_property(), 0)
 				set_outline_prop(get_edited_property(), 0)
 				get_edited_object().shader = mtoon_cull_off if cull_off else mtoon
-			1: # Cutout
+			1:  # Cutout
 				emit_changed(get_edited_property(), 1)
 				set_outline_prop(get_edited_property(), 1)
 				get_edited_object().shader = mtoon_cull_off if cull_off else mtoon
-			2: # Transparent
+			2:  # Transparent
 				emit_changed(get_edited_property(), 0)
 				set_outline_prop(get_edited_property(), 0)
 				get_edited_object().shader = mtoon_trans_cull_off if cull_off else mtoon_trans
-			3: # TransparentWithZWrite
+			3:  # TransparentWithZWrite
 				emit_changed(get_edited_property(), 0)
 				set_outline_prop(get_edited_property(), 0)
 				get_edited_object().shader = mtoon_trans_zwrite_cull_off if cull_off else mtoon_trans_zwrite
@@ -392,7 +409,9 @@ class RenderingTypeInspector extends MToonProperty:
 		cull_off_checkbox.button_pressed = cull_off
 		updating = false
 
-class OutlineModeInspector extends MToonProperty:
+
+class OutlineModeInspector:
+	extends MToonProperty
 	var dropdown: OptionButton = OptionButton.new()
 
 	func _init(tooltip: String) -> void:
@@ -404,9 +423,9 @@ class OutlineModeInspector extends MToonProperty:
 		add_focusable(dropdown)
 		dropdown.item_selected.connect(self._item_selected)
 
-
 	func _item_selected(option_idx: int) -> void:
-		if updating: return
+		if updating:
+			return
 		var next_pass: Material = get_edited_object().next_pass
 		var has_outline: bool = has_outline_pass()
 		if option_idx == 0 and has_outline:
@@ -430,7 +449,9 @@ class OutlineModeInspector extends MToonProperty:
 		update_hidden_props(val)
 		updating = false
 
-class OutlineColorModeInspector extends MToonProperty:
+
+class OutlineColorModeInspector:
+	extends MToonProperty
 	var dropdown: OptionButton = OptionButton.new()
 
 	func _init(tooltip: String) -> void:
@@ -442,7 +463,8 @@ class OutlineColorModeInspector extends MToonProperty:
 		dropdown.item_selected.connect(self._item_selected)
 
 	func _item_selected(option_idx: int) -> void:
-		if updating: return
+		if updating:
+			return
 		emit_changed(get_edited_property(), option_idx)
 		set_outline_prop(get_edited_property(), option_idx)
 
@@ -454,7 +476,9 @@ class OutlineColorModeInspector extends MToonProperty:
 		dropdown.selected = val
 		updating = false
 
-class DebugModeInspector extends MToonProperty:
+
+class DebugModeInspector:
+	extends MToonProperty
 	var dropdown: OptionButton = OptionButton.new()
 
 	func _init(tooltip: String) -> void:
@@ -467,7 +491,8 @@ class DebugModeInspector extends MToonProperty:
 		dropdown.item_selected.connect(self._item_selected)
 
 	func _item_selected(option_idx: int) -> void:
-		if updating: return
+		if updating:
+			return
 		emit_changed(get_edited_property(), option_idx)
 		set_outline_prop(get_edited_property(), option_idx)
 
@@ -479,8 +504,11 @@ class DebugModeInspector extends MToonProperty:
 		dropdown.selected = val
 		updating = false
 
-class ReserveInspector extends MToonProperty:
+
+class ReserveInspector:
+	extends MToonProperty
 	var hbox: HBoxContainer = HBoxContainer.new()
+
 	func _init(tooltip: String) -> void:
 		self.tooltip = tooltip
 		add_child(hbox, true)
@@ -488,7 +516,9 @@ class ReserveInspector extends MToonProperty:
 	func _update_property() -> void:
 		pass
 
-class SpinInspector extends MToonProperty:
+
+class SpinInspector:
+	extends MToonProperty
 	var x_input: Range = EditorSpinSlider.new()
 
 	func _init(tooltip: String, minval: float, maxval: float, step: float) -> void:
@@ -528,7 +558,9 @@ class SpinInspector extends MToonProperty:
 		x_input.value = this_value
 		updating = false
 
-class ScaleOffsetInspector extends MToonProperty:
+
+class ScaleOffsetInspector:
+	extends MToonProperty
 	var hbox: HBoxContainer = HBoxContainer.new()
 	var x_input: Range = EditorSpinSlider.new()
 	var y_input: Range = EditorSpinSlider.new()
@@ -560,7 +592,7 @@ class ScaleOffsetInspector extends MToonProperty:
 	func _update_property() -> void:
 		var st_value: Variant = get_edited_object()[get_edited_property()]
 		if typeof(st_value) == TYPE_NIL:
-			st_value = Plane(1,1,0,0)
+			st_value = Plane(1, 1, 0, 0)
 		updating = true
 		x_input.value = st_value.x
 		y_input.value = st_value.y
@@ -568,14 +600,16 @@ class ScaleOffsetInspector extends MToonProperty:
 		d_input.value = st_value.d
 		updating = false
 
-class LinearColorInspector extends MToonProperty:
+
+class LinearColorInspector:
+	extends MToonProperty
 	var color_picker: ColorPickerButton = ColorPickerButton.new()
 	var color_picker2: ColorPickerButton = ColorPickerButton.new()
 	var picker_box: HBoxContainer = HBoxContainer.new()
 
 	func _init(tooltip: String, allow_alpha: bool) -> void:
 		self.tooltip = tooltip
-		add_child(color_picker) # picker_box)
+		add_child(color_picker)  # picker_box)
 		#picker_box.add_child(color_picker, true)
 		add_focusable(color_picker)
 		#picker_box.add_child(color_picker2, true)
@@ -596,10 +630,10 @@ class LinearColorInspector extends MToonProperty:
 		var linear_color: Variant = get_edited_object()[get_edited_property()]
 		if typeof(linear_color) == TYPE_NIL:
 			const defaults = {
-				"_Color": Plane(1.0,1.0,1.0,1.0),
+				"_Color": Plane(1.0, 1.0, 1.0, 1.0),
 				"_ShadeColor": Plane(0.97, 0.81, 0.86, 1.0),
 			}
-			linear_color = defaults.get(str(get_edited_property()).split("/")[-1], Plane(0,0,0,1))
+			linear_color = defaults.get(str(get_edited_property()).split("/")[-1], Plane(0, 0, 0, 1))
 		updating = true
 		color_picker.color = Color(linear_color.x, linear_color.y, linear_color.z, linear_color.d)
 		updating = false
