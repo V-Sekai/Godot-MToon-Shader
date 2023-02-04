@@ -49,9 +49,14 @@ var property_text: Dictionary = {
 	"_SphereAdd": ["MatCap", "Additive Sphere map / MatCap Texture (RGB)", false],
 	"_ShadeToony": ["Shading Toony", "0.0 is Lambert. Higher value get toony shading."],
 	"_BumpScale": ["Normal Map", "Normal Map and Multiplier for normals in tangent space"],
-	"_ShadeShift": ["Shading Shift", "Zero is Default. Negative value increase lit area. Positive value increase shade area."],
+	"_ShadeShift":
+	["Shading Shift", "Zero is Default. Negative value increase lit area. Positive value increase shade area."],
 	"_ReceiveShadowRate": ["Shadow Receive", "Texture (R) * Rate. White is Default. Black attenuates shadows."],
-	"_ShadingGradeRate": ["Shading Grade", "Lit & Shade Mixing Multiplier: Texture (R) * Rate. Compatible with UTS2 ShadingGradeMap. White is Default. Black amplifies shade."],
+	"_ShadingGradeRate":
+	[
+		"Shading Grade",
+		"Lit & Shade Mixing Multiplier: Texture (R) * Rate. Compatible with UTS2 ShadingGradeMap. White is Default. Black amplifies shade."
+	],
 	"_LightColorAttenuation": ["Light Color Atten", "Light Color Attenuation"],
 	"_IndirectLightIntensity": ["GI Intensity", "Indirect Light Intensity"],
 	"_EmissionColor": ["Emission", "Emission Color (RGB)"],
@@ -59,7 +64,8 @@ var property_text: Dictionary = {
 	"_RimLightingMix": ["Lighting Mix", "Rim Lighting Mix"],
 	"_RimFresnelPower": ["Fresnel Power", "If you increase this value, you get sharper rim light."],
 	"_RimLift": ["Rim Lift", "If you increase this value, you can lift rim light."],
-	"_OutlineWidthMode": ["Mode", "None = outline pass disabled; World = outline in world coordinates; Screen = screen pixel thickness"],
+	"_OutlineWidthMode":
+	["Mode", "None = outline pass disabled; World = outline in world coordinates; Screen = screen pixel thickness"],
 	"_OutlineWidth": ["Width", "Outline Width"],
 	"_OutlineScaledMaxDistance": ["Outline Scaled Dist", "Width Scaled Max Distance"],
 	"_OutlineColorMode": ["Color Mode", "FixedColor = unshaded; MixedLighting = match environment light (recommended)"],
@@ -180,7 +186,9 @@ func _parse_end(object: Object) -> void:
 		var parent_vbox: Control = first_property.get_parent()
 		do_unfold_section(parent_vbox.get_parent())
 		for prop in property_name_to_editor:
-			property_name_to_editor[prop].tooltip_text = "shader_parameter/" + prop + "\n" + property_text.get(prop, ["", ""])[1]
+			property_name_to_editor[prop].tooltip_text = (
+				"shader_parameter/" + prop + "\n" + property_text.get(prop, ["", ""])[1]
+			)
 		for param in property_headers:
 			var property_editor: Control = property_name_to_editor.get(param)
 			if property_editor != null:
@@ -239,7 +247,9 @@ func is_a_shader_parameter(path: String) -> bool:
 	return path.begins_with("shader_parameter/")
 
 
-func _parse_property(object: Object, type: int, path: String, hint: int, hint_text: String, usage: int, wide: bool) -> bool:
+func _parse_property(
+	object: Object, type: int, path: String, hint: int, hint_text: String, usage: int, wide: bool
+) -> bool:
 	if not last_tex_property.is_empty():
 		_process_tex_property()
 		last_tex_property = ""
@@ -265,10 +275,14 @@ func _parse_property(object: Object, type: int, path: String, hint: int, hint_te
 				return true
 			elif param.ends_with("_ST"):
 				var reserve: ReserveInspector = ReserveInspector.new(tooltip)
-				add_property_editor_for_multiple_properties("Scale", PackedStringArray(["nothing_to_see_here"]), reserve)
+				add_property_editor_for_multiple_properties(
+					"Scale", PackedStringArray(["nothing_to_see_here"]), reserve
+				)
 				property_editor = ScaleOffsetInspector.new(tooltip, reserve)
 			else:
-				property_editor = SpinInspector.new(tooltip, mins.get(param, 0.0), maxes.get(param, 1.0), steps.get(param, 0.001))
+				property_editor = SpinInspector.new(
+					tooltip, mins.get(param, 0.0), maxes.get(param, 1.0), steps.get(param, 0.001)
+				)
 			property_name_to_editor[param] = property_editor
 			var path_arr = PackedStringArray(["shader_parameter/" + param])
 			add_property_editor_for_multiple_properties(property_text[param][0], path_arr, property_editor)
